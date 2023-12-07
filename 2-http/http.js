@@ -1,4 +1,3 @@
-"use strict";
 const http = require("http");
 var fs = require("fs");
 const port = process.env.PORT || 8000;
