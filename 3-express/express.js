@@ -1,8 +1,11 @@
 //////////////////////////////// DEPENDENCIES /////////////
 import express from 'express';
-const app = express();
+const app = express(); // server
 const port = 8000;
 import petsJSON from '../pets.json' assert { type: "json" };
+
+// req.body is undefined by default
+app.use(express.json()) // Populates req.body
 
 //////////////////////////////// PETS RESPONSE /////////////
 app.get('/pets', (req, res) => {
@@ -10,23 +13,31 @@ app.get('/pets', (req, res) => {
     console.log(petsJSON);
 });
 
-//////////////////////////////// PET 0 RESPONSE /////////////
-app.get('/pets/0', (req, res) => {
-    res.status(200).send(petsJSON[0]);
-    console.log(petsJSON[0]);
-});
-
-//////////////////////////////// PET 1 RESPONSE /////////////
-app.get('/pets/1', (req, res) => {
-    res.status(200).send(petsJSON[1]);
-    console.log(petsJSON[1]);
-});
-
-//////////////////////////////// ERROR RESPONSE /////////////
+//////////////////////////////// PET INDEXED RESPONSE /////////////
 app.get('/pets/:index', (req, res) => {
-    let { index } = req.params
-    console.log(request parameters\n${req.params});
+    let { index } = req.params;
+    if (index >= 0 && index < petsJSON.length) {
+        res.status(200).send(petsJSON[index]);
+        console.log(petsJSON[index]);
+    }
+    else {
+        res.status(404).send('Not Found');
+    }
+});
+
+//////////////////////////////// ERROR RESPONSES /////////////
+app.get('*', (req, res) => {
     res.status(404).send('Not Found');
+});
+
+//////////////////////////////// POST REQUEST /////////////
+app.post('/pets', (req, res) => {
+
+    const newPet = req.body; // Assigns newPet
+    console.log(newPet); // No longer undefined
+
+    petsJSON.push(newPet); // Add pet
+    res.status(200).send(newPet);
 });
 
 //////////////////////////////// LISTEN /////////////
