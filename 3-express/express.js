@@ -32,10 +32,8 @@ app.get('*', (req, res) => {
 
 //////////////////////////////// POST REQUEST /////////////
 app.post('/pets', (req, res) => {
-
     const newPet = req.body; // Assigns newPet
     console.log(newPet); // No longer undefined
-
     petsJSON.push(newPet); // Add pet
     res.status(200).send(newPet);
 });
