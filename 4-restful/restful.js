@@ -4,6 +4,7 @@ import fs from 'fs'
 
 ////////////////// database
 import pg from 'pg';
+import { error } from 'console';
 
 let client = new pg.Client({
     database: "petsdb"
@@ -18,7 +19,6 @@ app.use(express.json());
 app.use(logger)
 
 // CRUD 
-// app 
 app.get('/pets', async (req, res) => {
     try {
         const checkEmptyQuery = 'SELECT COUNT(*) FROM pets';
@@ -45,7 +45,6 @@ app.get('/pets', async (req, res) => {
     }
 });
 
-// post
 app.post('/pets', async (req, res) => {
     let body = req.body;
 
@@ -69,7 +68,7 @@ app.post('/pets', async (req, res) => {
         }
 
         petsData.push(newPet);
-        fs.writeFileSync('../pets.json', JSON.stringify(petsData, null, 2), 'utf-8');
+        fs.writeFileSync('../pets.json', JSON.stringify(petsData), 'utf-8');
         res.status(201).send(newPet);
     } catch (error) {
         console.error('Error executing query:', error);
@@ -77,8 +76,6 @@ app.post('/pets', async (req, res) => {
     }
 });
 
-
-// get /pets/3
 app.get('/pets/3', (req, res) => {
     let thirdPet = petsData[2]
         if (thirdPet == null) {
@@ -88,16 +85,27 @@ app.get('/pets/3', (req, res) => {
         }
 })
 
-// PATCH /pets/3
 app.patch('/pets/3', async (req, res) => {
     let thirdPet = petsData[2]
     let body = req.body;
     thirdPet.name = body.name
-    res.status(200).send(petsData)
+    thirdPet.age = body.age
+    thirdPet.kind = body.kind
+
+    petsData[2] = thirdPet
+
+    fs.writeFile("../pets.json", JSON.stringify(petsData), 'utf-8', async (error) => {
+        if (error) {
+            console.error(error)
+            res.status(500).send('error updating pet')
+            return;
+
+        }
+        await client.query('UPDATE pets SET name = $1, age = $2, kind = $3 WHERE id = $4', [body.name, body.age, body.kind, 3]);
+        res.status(200).send(petsData)
+    })
 })
 
-
-// delete /pets/3
 app.delete('/pets/3', (req, res) => {
     let thirdPet = petsData[2]
     petsData.splice(2,1)
