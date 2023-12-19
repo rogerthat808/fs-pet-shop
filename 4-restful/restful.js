@@ -85,13 +85,13 @@ app.get('/pets/3', (req, res) => {
         }
 })
 
-app.patch('/pets/3', async (req, res) => {
+app.put('/pets/:id', async (req, res) => {
+    const targetID = req.params.id
     let thirdPet = petsData[2]
     let body = req.body;
     thirdPet.name = body.name
     thirdPet.age = body.age
     thirdPet.kind = body.kind
-
     petsData[2] = thirdPet
 
     fs.writeFile("../pets.json", JSON.stringify(petsData), 'utf-8', async (error) => {
@@ -101,7 +101,7 @@ app.patch('/pets/3', async (req, res) => {
             return;
 
         }
-        await client.query('UPDATE pets SET name = $1, age = $2, kind = $3 WHERE id = $4', [body.name, body.age, body.kind, 3]);
+        await client.query('UPDATE pets SET name = $1, age = $2, kind = $3 WHERE id = $4', [body.name, body.age, body.kind, targetID]);
         res.status(200).send(petsData)
     })
 })
@@ -117,7 +117,7 @@ app.delete('/pets/3', (req, res) => {
             return;
         }
         try {
-            await client.query('DELETE FROM pets WHERE id = 3')
+            await client.query('DELETE FROM pets WHERE id = ')
             res.status(200).send(deleted)
         } catch (error) {
             console.error(error)
