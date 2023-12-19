@@ -108,8 +108,22 @@ app.patch('/pets/3', async (req, res) => {
 
 app.delete('/pets/3', (req, res) => {
     let thirdPet = petsData[2]
-    petsData.splice(2,1)
-    res.status(200).send(thirdPet)
+    let deleted = petsData.splice(2,1)
+
+    fs.writeFile('../pets.json', JSON.stringify(petsData), 'utf-8', async (error) => {
+        if (error) {
+            console.error(error)
+            res.status(500).send('Error deleting')
+            return;
+        }
+        try {
+            await client.query('DELETE FROM pets WHERE id = 3')
+            res.status(200).send(deleted)
+        } catch (error) {
+            console.error(error)
+            res.status(500).send('error deleting pet')
+        }
+    })
 })
 
 // Bonus kinda?:
